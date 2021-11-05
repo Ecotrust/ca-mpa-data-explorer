@@ -75,8 +75,21 @@
 
       // Seperate out each block into yearly polygons
       function parseBlockByYear(features) {
+        console.log(features.length);
         features.forEach(function (feature, index) {
-          console.log(feature);
+          let id = feature.id;
+          if (index > 0) {
+            let lastId = features[index - 1].id;
+            if (id === lastId) {
+              console.log('multiple id');
+            }
+          }
+          if (index < features.length) {
+            let nextId = features[index + 1].id;  
+            if (id === nextId) {
+              console.log('multiple id');
+            }
+          }
         })
       }
       
