@@ -1,2 +1,1 @@
-# ca-mpa-data-explorer
-CA MPA Spatial Data Explorer
+Spatial Data Explorer for CA MPA Human Uses
