@@ -6,6 +6,10 @@ name = "pypi"
 [packages]
 jupyterlab = "*"
 pandas = "*"
+geopandas = "*"
+folium = "*" 
+matplotlib = "*" 
+mapclassify = "*"
 
 [dev-packages]
 
