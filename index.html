@@ -6,7 +6,6 @@
     <meta name='viewport' content='width=device-width, initial-scale=1' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css' rel='stylesheet' />
-    <script src="./leaflet.timeline.js"></script>
     <style>
         body {
             margin: 0;
@@ -25,6 +24,48 @@
             margin: 0;
             margin-bottom: 15px;
           }
+
+          #menu {
+background: #fff;
+position: absolute;
+z-index: 1;
+top: 10px;
+right: 10px;
+border-radius: 3px;
+width: 120px;
+border: 1px solid rgba(0, 0, 0, 0.4);
+font-family: 'Open Sans', sans-serif;
+}
+ 
+#menu a {
+font-size: 13px;
+color: #404040;
+display: block;
+margin: 0;
+padding: 0;
+padding: 10px;
+text-decoration: none;
+border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+text-align: center;
+}
+ 
+#menu a:last-child {
+border: none;
+}
+ 
+#menu a:hover {
+background-color: #f8f8f8;
+color: #404040;
+}
+ 
+#menu a.active {
+background-color: #3887be;
+color: #ffffff;
+}
+ 
+#menu a.active:hover {
+background: #3074a4;
+}
     </style>
 
     <style>
@@ -70,13 +111,15 @@
 </head>
 <body>
 
+    <div id="menu"></div>
+
     <div id="map"></div>
  
 <div class="map-overlay top">
 <div class="map-overlay-inner">
     <h1>Sheepshead</h2>
     <label id="year">2008</label>
-    <input id="slider" type="range" min="2005" max="2011" step="1" value="">
+    <input id="slider" type="range" min="2005" max="2020" step="1" value="2008">
 </div>
 <div class="map-overlay-inner">
 <div id="legend" class="legend">
@@ -103,343 +146,154 @@
         '2008',
         '2009',
         '2010',
-        '2011'
-        // '2012',
-        // '2013',
-        // '2014',
-        // '2015',
-        // '2016',
-        // '2017',
-        // '2018',
-        // '2019',
-        // '2020'
+        '2011',
+        '2012',
+        '2013',
+        '2014',
+        '2015',
+        '2016',
+        '2017',
+        '2018',
+        '2019',
+        '2020'
+    ];
+
+    var species = [
+        'sheepshead',
+        'urchine'
     ];
      
     function filterBy(year) {
-        console.log(year)
-        // var filters = ['get', year];
-        // year = year.toString().slice(3);
+        document.getElementById('year').innerHTML = year;
+        mpasYear = `RF_${year}`;
+        sheepsheadYear = `sheepshead-${year}`;
+        // Set the label to the year
+        // document.getElementById('year').textContent = years[year];
+        for (var eachYear of years) {
+            map.setLayoutProperty(`sheepshead-${eachYear}`, 'visibility', 'none');
+        };
         
-        var mpasYear = `mpas-${year}`;
-        // map.setFilter(mpasYear, filters);
-        
-        for (var year of years) {
-            var  iYear = `mpas-${year}`;  
-            map.setLayoutProperty(
-                iYear,
-                'visibility',
-                'none'
-            );
-        }
         map.setLayoutProperty(
-            mpasYear,
+            sheepsheadYear,
             'visibility',
             'visible'
         );
+
+        
     }
 
     map.on('load', function() {
-
-        map.addSource('smpa', {
-            'type': 'vector',
+        
+        map.addSource('sheepshead-source', {
+            type: 'vector',
             url: 'mapbox://mpahu.86v7vgbz'
         });
         
-        map.addLayer({
-            id: 'mpas-2005',
-            type: 'fill',
-            source: 'smpa',
-            'source-layer': 'crfs_sps_rf_cshd-cagvov',
-            'layout': {
-                visibility: 'none',
-            },
-            paint: {
-                // 'fill-color': ['-', 0, ['number', ['get', 'RF_2006'], 1]],
-                'fill-opacity': 0.8,
-                'fill-color': [
-                    'interpolate',
-                    ['linear'],
-                    ['get','RF_2005'],
-                    0,
-                    'transparent',
-                    0.0000000001,
-                    'rgba(56,168,0,1)',
-                    6.3442333148500003,
-                    'rgba(90,187,0,1)',
-                    46.382601766800001,
-                    'rgba(130,206,0,1)',
-                    83.7009557234,
-                    'rgba(175,226,0,1)',
-                    138.48820086399999,
-                    'rgba(227,245,0,1)',
-                    215.70801481399999,
-                    'rgba(255,226,0,1)',
-                    321.83227328700002,
-                    'rgba(255,170,0,1)',
-                    461.69610297499997,
-                    'rgba(255,113,0,1)',
-                    659.59383335500002,
-                    'rgba(255,56,0,1)',
-                    1053.69263228,
-                    'rgba(255,0,0,1)',
-                ]
-            },
-
+        years.forEach(function(year) {
+            map.addLayer({
+                'id': `sheepshead-${year}`,
+                'type': 'fill',
+                'source': 'sheepshead-source',
+                'source-layer': 'crfs_sps_rf_cshd-cagvov',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'paint': {
+                    'fill-opacity': 0.8,
+                    'fill-color': {
+                        'property': `RF_${year}`,
+                        'stops': [
+                            [0, '#fbb03b'],
+                            [0.0000000001, '#fbb03b'],
+                            [6.3442333148500003, '#fbb03b'],
+                            [46.382601766800001, 'rgba(130,206,0,1)'],
+                            [83.7009557234, 'rgba(175,226,0,1)'],
+                            [138.48820086399999, 'rgba(227,245,0,1)'],
+                            [215.70801481399999, 'rgba(255,226,0,1)'],
+                            [321.83227328700002, 'rgba(255,170,0,1)'],
+                            [461.69610297499997, 'rgba(255,113,0,1)'],
+                            [659.59383335500002, 'rgba(255,56,0,1)'],
+                            [1053.69263228, 'rgba(255,0,0,1)'],
+                        ]
+                    }
+                }
+            });
         });
 
-        map.addLayer({
-            id: 'mpas-2006',
-            type: 'fill',
-            source: 'smpa',
-            'layout': {
-                visibility: 'none',
-            },
-            'source-layer': 'crfs_sps_rf_cshd-cagvov',
-            paint: {
-                // 'fill-color': ['-', 0, ['number', ['get', 'RF_2006'], 1]],
-                'fill-opacity': 0.8,
-                'fill-color': [
-                    'interpolate',
-                    ['linear'],
-                    ['get','RF_2006'],
-                    0,
-                    'transparent',
-                    0.0000000001,
-                    'rgba(56,168,0,1)',
-                    6.3442333148500003,
-                    'rgba(90,187,0,1)',
-                    46.382601766800001,
-                    'rgba(130,206,0,1)',
-                    83.7009557234,
-                    'rgba(175,226,0,1)',
-                    138.48820086399999,
-                    'rgba(227,245,0,1)',
-                    215.70801481399999,
-                    'rgba(255,226,0,1)',
-                    321.83227328700002,
-                    'rgba(255,170,0,1)',
-                    461.69610297499997,
-                    'rgba(255,113,0,1)',
-                    659.59383335500002,
-                    'rgba(255,56,0,1)',
-                    1053.69263228,
-                    'rgba(255,0,0,1)',
-                ]
-            },
-        });
-
-        map.addLayer({
-            id: 'mpas-2007',
-            type: 'fill',
-            source: 'smpa',
-            'layout': {
-                visibility: 'none',
-            },
-            'source-layer': 'crfs_sps_rf_cshd-cagvov',
-            paint: {
-                // 'fill-color': ['-', 0, ['number', ['get', 'RF_2006'], 1]],
-                'fill-opacity': 0.8,
-                'fill-color': [
-                    'interpolate',
-                    ['linear'],
-                    ['get','RF_2007'],
-                    0,
-                    'transparent',
-                    0.0000000001,
-                    'rgba(56,168,0,1)',
-                    6.3442333148500003,
-                    'rgba(90,187,0,1)',
-                    46.382601766800001,
-                    'rgba(130,206,0,1)',
-                    83.7009557234,
-                    'rgba(175,226,0,1)',
-                    138.48820086399999,
-                    'rgba(227,245,0,1)',
-                    215.70801481399999,
-                    'rgba(255,226,0,1)',
-                    321.83227328700002,
-                    'rgba(255,170,0,1)',
-                    461.69610297499997,
-                    'rgba(255,113,0,1)',
-                    659.59383335500002,
-                    'rgba(255,56,0,1)',
-                    1053.69263228,
-                    'rgba(255,0,0,1)',
-                ]
-            },
-        });
-
-        map.addLayer({
-            id: 'mpas-2008',
-            type: 'fill',
-            source: 'smpa',
-            'layout': {
-                visibility: 'visible',
-            },
-            'source-layer': 'crfs_sps_rf_cshd-cagvov',
-            paint: {
-                // 'fill-color': ['-', 0, ['number', ['get', 'RF_2006'], 1]],
-                'fill-opacity': 0.8,
-                'fill-color': [
-                    'interpolate',
-                    ['linear'],
-                    ['get','RF_2008'],
-                    0,
-                    'transparent',
-                    0.0000000001,
-                    'rgba(56,168,0,1)',
-                    6.3442333148500003,
-                    'rgba(90,187,0,1)',
-                    46.382601766800001,
-                    'rgba(130,206,0,1)',
-                    83.7009557234,
-                    'rgba(175,226,0,1)',
-                    138.48820086399999,
-                    'rgba(227,245,0,1)',
-                    215.70801481399999,
-                    'rgba(255,226,0,1)',
-                    321.83227328700002,
-                    'rgba(255,170,0,1)',
-                    461.69610297499997,
-                    'rgba(255,113,0,1)',
-                    659.59383335500002,
-                    'rgba(255,56,0,1)',
-                    1053.69263228,
-                    'rgba(255,0,0,1)',
-                ]
-            },
-        });
-
-        map.addLayer({
-            id: 'mpas-2009',
-            type: 'fill',
-            source: 'smpa',
-            'layout': {
-                visibility: 'none',
-            },
-            'source-layer': 'crfs_sps_rf_cshd-cagvov',
-            paint: {
-                // 'fill-color': ['-', 0, ['number', ['get', 'RF_2006'], 1]],
-                'fill-opacity': 0.8,
-                'fill-color': [
-                    'interpolate',
-                    ['linear'],
-                    ['get','RF_2009'],
-                    0,
-                    'transparent',
-                    0.0000000001,
-                    'rgba(56,168,0,1)',
-                    6.3442333148500003,
-                    'rgba(90,187,0,1)',
-                    46.382601766800001,
-                    'rgba(130,206,0,1)',
-                    83.7009557234,
-                    'rgba(175,226,0,1)',
-                    138.48820086399999,
-                    'rgba(227,245,0,1)',
-                    215.70801481399999,
-                    'rgba(255,226,0,1)',
-                    321.83227328700002,
-                    'rgba(255,170,0,1)',
-                    461.69610297499997,
-                    'rgba(255,113,0,1)',
-                    659.59383335500002,
-                    'rgba(255,56,0,1)',
-                    1053.69263228,
-                    'rgba(255,0,0,1)',
-                ]
-            },
-        });
-
-        map.addLayer({
-            id: 'mpas-2010',
-            type: 'fill',
-            source: 'smpa',
-            'layout': {
-                visibility: 'none',
-            },
-            'source-layer': 'crfs_sps_rf_cshd-cagvov',
-            paint: {
-                // 'fill-color': ['-', 0, ['number', ['get', 'RF_2006'], 1]],
-                'fill-opacity': 0.8,
-                'fill-color': [
-                    'interpolate',
-                    ['linear'],
-                    ['get','RF_2010'],
-                    0,
-                    'transparent',
-                    0.0000000001,
-                    'rgba(56,168,0,1)',
-                    6.3442333148500003,
-                    'rgba(90,187,0,1)',
-                    46.382601766800001,
-                    'rgba(130,206,0,1)',
-                    83.7009557234,
-                    'rgba(175,226,0,1)',
-                    138.48820086399999,
-                    'rgba(227,245,0,1)',
-                    215.70801481399999,
-                    'rgba(255,226,0,1)',
-                    321.83227328700002,
-                    'rgba(255,170,0,1)',
-                    461.69610297499997,
-                    'rgba(255,113,0,1)',
-                    659.59383335500002,
-                    'rgba(255,56,0,1)',
-                    1053.69263228,
-                    'rgba(255,0,0,1)',
-                ]
-            },
-        });
-
-        map.addLayer({
-            id: 'mpas-2011',
-            type: 'fill',
-            source: 'smpa',
-            'layout': {
-                visibility: 'none',
-            },
-            'source-layer': 'crfs_sps_rf_cshd-cagvov',
-            paint: {
-                // 'fill-color': ['-', 0, ['number', ['get', 'RF_2006'], 1]],
-                'fill-opacity': 0.8,
-                'fill-color': [
-                    'interpolate',
-                    ['linear'],
-                    ['get','RF_2011'],
-                    0,
-                    'transparent',
-                    0.0000000001,
-                    'rgba(56,168,0,1)',
-                    6.3442333148500003,
-                    'rgba(90,187,0,1)',
-                    46.382601766800001,
-                    'rgba(130,206,0,1)',
-                    83.7009557234,
-                    'rgba(175,226,0,1)',
-                    138.48820086399999,
-                    'rgba(227,245,0,1)',
-                    215.70801481399999,
-                    'rgba(255,226,0,1)',
-                    321.83227328700002,
-                    'rgba(255,170,0,1)',
-                    461.69610297499997,
-                    'rgba(255,113,0,1)',
-                    659.59383335500002,
-                    'rgba(255,56,0,1)',
-                    1053.69263228,
-                    'rgba(255,0,0,1)',
-                ]
-            },
-        });
-
-
-        // Set filter to first month of the year
-        // RF_2005 = 2005
-        // 
-    // filterBy('RF_2006');
+        filterBy(2008);
          
     });
+
+    // After the last frame rendered before the map enters an "idle" state.
+    map.on('idle', () => {
+        // If these two layers were not added to the map, abort
+        if (!map.getLayer('sheepshead-2005') || !map.getLayer('sheepshead-2020')) {
+            return;
+        }
+
+        // Create groups for each species.
+        const speciesGroups = [];
+        
+        species.forEach(function(species) {
+            // Enumerate ids of the layers.
+            const toggleableLayerIds = [];
+
+            years.forEach(function(year) {
+                toggleableLayerIds.push(`${species}-${year}`);
+            });
+            
+            speciesGroups.push({
+                'id': species,
+                'layers': toggleableLayerIds.filter(id => id.includes(species))
+            });
+        });
+        
+        // Set up the corresponding toggle button for each layer.
+        for (const species of speciesGroups) {
+            // Skip layers that already have a button set up.
+            if (document.getElementById(species.id)) {
+                continue;
+            }
+            
+        
+            // Create a link.
+            const link = document.createElement('a');
+            link.id = species.id;
+            link.href = '#';
+            link.textContent = species.id;
+            link.className = 'active';
+        
+            // Show or hide layer when the toggle is clicked.
+            link.onclick = function (e) {
+                const clickedLayer = this.textContent;
+                e.preventDefault();
+                e.stopPropagation();
+        
+                const visibility = map.getLayoutProperty(
+                    clickedLayer,
+                    'visibility'
+                );
+        
+                // Toggle layer visibility by changing the layout object's visibility property.
+                if (visibility === 'visible') {
+                    map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                    this.className = '';
+                } else {
+                    this.className = 'active';
+                    map.setLayoutProperty(
+                        clickedLayer,
+                        'visibility',
+                        'visible'
+                    );
+                }
+            };
+        
+            const layers = document.getElementById('menu');
+            layers.appendChild(link);
+        }
+    });
+
+    
 
     document
         .getElementById('slider')
@@ -447,7 +301,6 @@
             var year = parseInt(e.target.value, 10);
             // year = 'RF_' + year;
             filterBy(year);
-            document.getElementById('year').innerHTML = year;
     });
 
 
