@@ -117,7 +117,7 @@ background: #3074a4;
  
 <div class="map-overlay top">
 <div class="map-overlay-inner">
-    <h1>Sheepshead</h2>
+    <h2 id="active-species"></h2>
     <label id="year">2008</label>
     <input id="slider" type="range" min="2005" max="2020" step="1" value="2008">
 </div>
@@ -159,22 +159,31 @@ background: #3074a4;
     ];
 
     var speciesList = [
-        'sheepshead',
-        'urchine'
+        {
+            'name': 'sheepshead',
+            'source': 'mapbox://mpahu.86v7vgbz',
+            'sourceLayer': 'crfs_sps_rf_cshd-cagvov'
+        },
+        {
+            'name': 'urchin',
+            'source': 'mapbox://mpahu.5trz69b1',
+            'sourceLayer': 'CRFS_SPS_RF_urch-7ge87u'
+        }
     ];
      
-    function filterBy(year) {
+    function filterBy(year, speciesName) {
         document.getElementById('year').innerHTML = year;
+
         mpasYear = `RF_${year}`;
-        sheepsheadYear = `sheepshead-${year}`;
+        speciesYear = `${speciesName}-${year}`;
         // Set the label to the year
         // document.getElementById('year').textContent = years[year];
         for (var eachYear of yearsList) {
-            map.setLayoutProperty(`sheepshead-${eachYear}`, 'visibility', 'none');
+            map.setLayoutProperty(`${speciesName}-${eachYear}`, 'visibility', 'none');
         };
         
         map.setLayoutProperty(
-            sheepsheadYear,
+            speciesYear,
             'visibility',
             'visible'
         );
@@ -184,43 +193,46 @@ background: #3074a4;
 
     map.on('load', function() {
         
-        map.addSource('sheepshead-source', {
-            type: 'vector',
-            url: 'mapbox://mpahu.86v7vgbz'
-        });
-        
-        yearsList.forEach(function(year) {
-            map.addLayer({
-                'id': `sheepshead-${year}`,
-                'type': 'fill',
-                'source': 'sheepshead-source',
-                'source-layer': 'crfs_sps_rf_cshd-cagvov',
-                'layout': {
-                    'visibility': 'none'
-                },
-                'paint': {
-                    'fill-opacity': 0.6,
-                    'fill-color': {
-                        'property': `RF_${year}`,
-                        'stops': [
-                            [0, '#fbb03b'],
-                            [0.0000000001, '#fbb03b'],
-                            [6.3442333148500003, '#fbb03b'],
-                            [46.382601766800001, 'rgba(130,206,0,1)'],
-                            [83.7009557234, 'rgba(175,226,0,1)'],
-                            [138.48820086399999, 'rgba(227,245,0,1)'],
-                            [215.70801481399999, 'rgba(255,226,0,1)'],
-                            [321.83227328700002, 'rgba(255,170,0,1)'],
-                            [461.69610297499997, 'rgba(255,113,0,1)'],
-                            [659.59383335500002, 'rgba(255,56,0,1)'],
-                            [1053.69263228, 'rgba(255,0,0,1)'],
-                        ]
+        speciesList.forEach(function(species) {
+            
+            map.addSource(`${species.name}-source`, {
+                type: 'vector',
+                url: `${species.source}`
+            });
+
+            yearsList.forEach(function(year) {
+                map.addLayer({
+                    'id': `${species.name}-${year}`,
+                    'type': 'fill',
+                    'source': `${species.name}-source`,
+                    'source-layer': `${species.sourceLayer}`,
+                    'layout': {
+                        'visibility': 'none'
+                    },
+                    'paint': {
+                        'fill-opacity': 0.1,
+                        'fill-color': {
+                            'property': `RF_${year}`,
+                            'stops': [
+                                [0, '#fbb03b'],
+                                [0.0000000001, '#fbb03b'],
+                                [6.3442333148500003, '#fbb03b'],
+                                [46.382601766800001, 'rgba(130,206,0,1)'],
+                                [83.7009557234, 'rgba(175,226,0,1)'],
+                                [138.48820086399999, 'rgba(227,245,0,1)'],
+                                [215.70801481399999, 'rgba(255,226,0,1)'],
+                                [321.83227328700002, 'rgba(255,170,0,1)'],
+                                [461.69610297499997, 'rgba(255,113,0,1)'],
+                                [659.59383335500002, 'rgba(255,56,0,1)'],
+                                [1053.69263228, 'rgba(255,0,0,1)'],
+                            ]
+                        }
                     }
-                }
+                });
             });
         });
 
-        filterBy(2008);
+    
          
     });
 
@@ -239,12 +251,12 @@ background: #3074a4;
             const toggleableLayerIds = [];
 
             yearsList.forEach(function(year) {
-                toggleableLayerIds.push(`${species}-${year}`);
+                toggleableLayerIds.push(`${species.name}-${year}`);
             });
             
             speciesGroups.push({
-                'id': species,
-                'layers': toggleableLayerIds.filter(id => id.includes(species))
+                'id': species.name,
+                'layers': toggleableLayerIds.filter(id => id.includes(species.name))
             });
         });
         
@@ -270,6 +282,9 @@ background: #3074a4;
                 e.preventDefault();
                 e.stopPropagation();
                 
+                // Set species name for slider
+                document.getElementById('active-species').innerHTML = species.id;
+
                 const clickedArray = clicked.split(',');
                 const sliderYear = document.getElementById('slider').value;
                 
@@ -280,6 +295,9 @@ background: #3074a4;
                     visibleLayer,
                     'visibility'
                 );
+
+                // Hide all layers now, then we add the clicked layer back visible
+                hideAllLayers();
 
                 // Toggle layer visibility by changing the layout object's visibility property.
                 if (visibility === 'visible') {
@@ -303,7 +321,7 @@ background: #3074a4;
     function hideAllLayers() {
         speciesList.forEach(function(species) {
             yearsList.forEach(function(year) {
-                map.setLayoutProperty(`${species}-${year}`, 'visibility', 'none');
+                map.setLayoutProperty(`${species.name}-${year}`, 'visibility', 'none');
             });
         });
     }
@@ -314,7 +332,8 @@ background: #3074a4;
         .addEventListener('input', function (e) {
             var year = parseInt(e.target.value, 10);
             // year = 'RF_' + year;
-            filterBy(year);
+            var speciesName = document.getElementById('active-species').innerHTML;
+            filterBy(year, speciesName);
     });
 
 
