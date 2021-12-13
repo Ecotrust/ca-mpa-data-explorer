@@ -7,15 +7,16 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css' rel='stylesheet' />
     <style>
-        body {
-            margin: 0;
-            padding: 0;
+        #page-container { 
+            position: relative; 
+            height: calc(100vh - 125px); 
         }
-
         #map {
             position: absolute;
-            top: 0;
+            top: 0px;
             bottom: 0;
+            left: 0;
+            right: 0;
             width: 100%;
         }
         .leaflet-timeline-controls{
@@ -23,321 +24,561 @@
             width: 100%;
             margin: 0;
             margin-bottom: 15px;
-          }
+        }
 
-          #menu {
-background: #fff;
-position: absolute;
-z-index: 1;
-top: 10px;
-right: 10px;
-border-radius: 3px;
-width: 120px;
-border: 1px solid rgba(0, 0, 0, 0.4);
-font-family: 'Open Sans', sans-serif;
-}
+        .mapboxgl-popup {
+            max-width: 500px;
+        }
+
+        #menu {
+            background: #fff;
+            position: absolute;
+            z-index: 1;
+            top: 20px;
+            right: 10px;
+            border-radius: 3px;
+            width: 200px;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            font-family: 'Open Sans', sans-serif;
+        }
  
-#menu a {
-font-size: 13px;
-color: #404040;
-display: block;
-margin: 0;
-padding: 0;
-padding: 10px;
-text-decoration: none;
-border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-text-align: center;
-}
+        #menu a {
+            font-size: 12px;
+            color: #333;
+            display: block;
+            margin: 0;
+            padding: 0;
+            padding: 10px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
  
-#menu a:last-child {
-border: none;
-}
+        #menu a:last-child {
+            border: none;
+        }
  
-#menu a:hover {
-background-color: #f8f8f8;
-color: #404040;
-}
+        #menu a:hover {
+            background-color: #00aa77;
+            color: #404040;
+        }
  
-#menu a.active {
-background-color: #3887be;
-color: #ffffff;
-}
+        #menu a.active {
+            background-color: #009955;
+            color: #ffffff;
+        }
  
-#menu a.active:hover {
-background: #3074a4;
-}
+        #menu a.active:hover {
+            background: #ddd;
+        }
     </style>
 
     <style>
-    .map-overlay {
-        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        position: absolute;
-        width: 25%;
-        top: 0;
-        left: 0;
-        padding: 10px;
-    }
+        .map-overlay {
+            font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            position: absolute;
+            width: 25%;
+            top: 0;
+            left: 0;
+            padding: 10px;
+        }
      
-    .map-overlay .map-overlay-inner {
-    background-color: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
-    padding: 10px;
-    margin-bottom: 10px;
-    }
+        .map-overlay .map-overlay-inner {
+            background-color: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            padding: 6px;
+            margin-bottom: 10px;
+        }
      
-    .map-overlay h2 {
-    line-height: 24px;
-    display: block;
-    margin: 0 0 10px;
-    }
+        .map-overlay h2 {
+            line-height: 24px;
+            display: block;
+            margin: 0 0 10px;
+        }
      
-    .map-overlay .legend .bar {
-    height: 10px;
-    width: 100%;
-    background: linear-gradient(to right, rgba(56,168,0,1), rgba(255,56,0,1));
-    }
-     
-    .map-overlay input {
-    background-color: transparent;
-    display: inline-block;
-    width: 100%;
-    position: relative;
-    margin: 0;
-    cursor: ew-resize;
-    }
+        .map-overlay .legend .bar {
+            height: 10px;
+            width: 100%;
+            background: linear-gradient(90deg, rgba(100,240,0,1) 0%, rgba(130,206,0,1) 12%, rgba(175,226,0,1) 24%, rgba(227,245,0,1) 36%, rgba(255,226,0,1) 48%, rgba(255,170,0,1) 60%, rgba(255,113,0,1) 72%, rgba(255,56,0,1) 84%, rgba(255,0,0,1) 100%);
+        }
+        .map-overlay input {
+            background-color: transparent;
+            display: inline-block;
+            width: 100%;
+            position: relative;
+            margin: 0;
+            cursor: ew-resize;
+        }
+
+    #slider {
+   appearance: auto;
+   -webkit-appearance: auto;
+}
     </style>
 
 </head>
 <body>
 
     <div id="menu"></div>
-
     <div id="map"></div>
+
+    <div class="map-overlay top">
+        <div class="map-overlay-inner">
+            <h2 id="active-species">Lobster</h2>
+            <label id="year">2005</label>
+            <input id="slider" type="range" min="2005" max="2020" step="1" value="2005">
+        </div>
+        <div class="map-overlay-inner">
+            <div id="legend" class="legend">
+                <div class="bar"></div>
+                <div>lbs (yr)</div>
+            </div>
+        </div>
+    </div>        
  
-<div class="map-overlay top">
-<div class="map-overlay-inner">
-    <h2 id="active-species"></h2>
-    <label id="year">2008</label>
-    <input id="slider" type="range" min="2005" max="2020" step="1" value="2008">
-</div>
-<div class="map-overlay-inner">
-<div id="legend" class="legend">
-<div class="bar"></div>
-<div>lbs (yr)</div>
-</div>
-</div>
-</div>
- 
-<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoibXBhaHUiLCJhIjoiY2tyZmRhaGRqMzZkZjJxcjJnOWoyejJwaCJ9.Vd3zk7da05LpU8KM1kqtZA';
-    var map = new mapboxgl.Map({
-        container: 'map', // container id
-        style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
-        center: [-120.561, 34.271], // starting position [lng, lat]
-        zoom: 8 // starting zoom
-    });
-
-    var yearsList = [
-        '2005',
-        '2006',
-        '2007',
-        '2008',
-        '2009',
-        '2010',
-        '2011',
-        '2012',
-        '2013',
-        '2014',
-        '2015',
-        '2016',
-        '2017',
-        '2018',
-        '2019',
-        '2020'
-    ];
-
-    var speciesList = [
-        {
-            'name': 'sheepshead',
-            'source': 'mapbox://mpahu.86v7vgbz',
-            'sourceLayer': 'crfs_sps_rf_cshd-cagvov'
-        },
-        {
-            'name': 'urchin',
-            'source': 'mapbox://mpahu.5trz69b1',
-            'sourceLayer': 'CRFS_SPS_RF_urch-7ge87u'
-        }
-    ];
-     
-    function filterBy(year, speciesName) {
-        document.getElementById('year').innerHTML = year;
-
-        mpasYear = `RF_${year}`;
-        speciesYear = `${speciesName}-${year}`;
-        // Set the label to the year
-        // document.getElementById('year').textContent = years[year];
-        for (var eachYear of yearsList) {
-            map.setLayoutProperty(`${speciesName}-${eachYear}`, 'visibility', 'none');
-        };
-        
-        map.setLayoutProperty(
-            speciesYear,
-            'visibility',
-            'visible'
-        );
-
-        
-    }
-
-    map.on('load', function() {
-        
-        speciesList.forEach(function(species) {
-            
-            map.addSource(`${species.name}-source`, {
-                type: 'vector',
-                url: `${species.source}`
-            });
-
-            yearsList.forEach(function(year) {
-                map.addLayer({
-                    'id': `${species.name}-${year}`,
-                    'type': 'fill',
-                    'source': `${species.name}-source`,
-                    'source-layer': `${species.sourceLayer}`,
-                    'layout': {
-                        'visibility': 'none'
-                    },
-                    'paint': {
-                        'fill-opacity': 0.1,
-                        'fill-color': {
-                            'property': `RF_${year}`,
-                            'stops': [
-                                [0, '#fbb03b'],
-                                [0.0000000001, '#fbb03b'],
-                                [6.3442333148500003, '#fbb03b'],
-                                [46.382601766800001, 'rgba(130,206,0,1)'],
-                                [83.7009557234, 'rgba(175,226,0,1)'],
-                                [138.48820086399999, 'rgba(227,245,0,1)'],
-                                [215.70801481399999, 'rgba(255,226,0,1)'],
-                                [321.83227328700002, 'rgba(255,170,0,1)'],
-                                [461.69610297499997, 'rgba(255,113,0,1)'],
-                                [659.59383335500002, 'rgba(255,56,0,1)'],
-                                [1053.69263228, 'rgba(255,0,0,1)'],
-                            ]
-                        }
-                    }
-                });
-            });
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoibXBhaHUiLCJhIjoiY2tyZmRhaGRqMzZkZjJxcjJnOWoyejJwaCJ9.Vd3zk7da05LpU8KM1kqtZA';
+        var map = new mapboxgl.Map({
+            container: 'map', // container id
+            style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+            center: [-120.561, 34.271], // starting position [lng, lat]
+            zoom: 8 // starting zoom
         });
-
     
+        const mpaColors = {
+            'SMR': '#ff0000',
+            'SMCA': '#0070ff',
+            'SMRMA': '#38a800',
+            'SMCA (No-Take)': '#df73ff',
+            'SC': '#ff00c5',
+            'SP': '#ffff00'
+        };
+    
+        var yearsList = [
+            '2005',
+            '2006',
+            '2007',
+            '2008',
+            '2009',
+            '2010',
+            '2011',
+            '2012',
+            '2013',
+            '2014',
+            '2015',
+            '2016',
+            '2017',
+            '2018',
+            '2019',
+            '2020'
+        ];
+    
+        var speciesList = [
+            {
+                'name': 'Lobster',
+                'source': 'mapbox://mpahu.7vr0ubhl',
+                'sourceLayer': 'CRFS_SPS_RF_lobt-9p2poo'
+            },
+            {
+                'name': 'Urchin',
+                'source': 'mapbox://mpahu.5trz69b1',
+                'sourceLayer': 'CRFS_SPS_RF_urch-7ge87u'
+            },
+            {
+                'name': 'Nearshore_fishfin_all',
+                'source': 'mapbox://mpahu.bvs86fmg',
+                'sourceLayer': 'CRFS_SPS_RF_nsfn-a8p67p'
+            },
+            {
+                'name': 'Treefish_Rockfish',
+                'source': 'mapbox://mpahu.3rh1308v',
+                'sourceLayer': 'CRFS_SPS_RF_tfrf-ckrfw1'
+            },
+            {
+                'name': 'Quillback_Rockfish',
+                'source': 'mapbox://mpahu.dglc5ex7',
+                'sourceLayer': 'CRFS_SPS_RF_qbrf-1dkj98'
+            },
+            {
+                'name': 'Olive_Rockfish',
+                'source': 'mapbox://mpahu.73kl8056',
+                'sourceLayer': 'CRFS_SPS_RF_olrf-aconf8',
+            },
+            {
+                'name': 'Monkeyface_Prickleback',
+                'source': 'mapbox://mpahu.cg8hjrzo',
+                'sourceLayer': 'CRFS_SPS_RF_mfpb-7ms6yb'
+            },
+            {
+                'name': 'Kelp_Rockfish',
+                'source': 'mapbox://mpahu.862s6v2l',
+                'sourceLayer': 'CRFS_SPS_RF_kprf-24jxyz'
+            },
+            {
+                'name': 'Kelp_Greenling',
+                'source': 'mapbox://mpahu.4rgcmubk',
+                'sourceLayer': 'CRFS_SPS_RF_kpgn-7ovw2f'
+            },
+            {
+                'name': 'Grass_Rockfish',
+                'source': 'mapbox://mpahu.8kujs736',
+                'sourceLayer': 'CRFS_SPS_RF_grrf-6biq25',
+            },
+            {
+                'name': 'China_Rockfish',
+                'source': 'mapbox://mpahu.0eyqi9mk',
+                'sourceLayer': 'CRFS_SPS_RF_chrf-c501ww'
+            },
+            {
+                'name': 'Gopher_Rockfish',
+                'source': 'mapbox://mpahu.12zcggto',
+                'sourceLayer': 'CRFS_SPS_RF_gorf-a78nvu'
+            },
+            {
+                'name': 'California_Sheephead',
+                'source': 'mapbox://mpahu.chda41ik',
+                'sourceLayer': 'CRFS_SPS_RF_cshd-70k4sb'
+            },
+            {
+                'name': 'Copper_Rockfish',
+                'source': 'mapbox://mpahu.48qicsp7',
+                'sourceLayer': 'CRFS_SPS_RF_cprf-2aj69f'
+            },
+            {
+                'name': 'Cabezon',
+                'source': 'mapbox://mpahu.53d3bcdm',
+                'sourceLayer': 'crfs_sps_rf_cbzn-0qiefg'
+            },
+            {
+                'name': 'Blue_Rockfish',
+                'source': 'mapbox://mpahu.d7crtpei',
+                'sourceLayer': 'crfs_sps_rf_burf-5qzuve'
+            },
+            {
+                'name': 'California_Scorpionfish',
+                'source': 'mapbox://mpahu.01zcjqgd',
+                'sourceLayer': 'crfs_sps_rf_casn-dt2z17'
+            },
+            {
+                'name': 'Black-Yellow_Rockfish',
+                'source': 'mapbox://mpahu.08xsc9ag',
+                'sourceLayer': 'crfs_sps_rf_byrf-d4l9f4'
+            },
+            {
+                'name': 'Brown_Rockfish',
+                'source': 'mapbox://mpahu.48tqsvix',
+                'sourceLayer': 'crfs_sps_rf_brrf-9w8d5m'
+            },
+            {
+                'name': 'Black_Rockfish',
+                'source': 'mapbox://mpahu.5ruuwl9q',
+                'sourceLayer': 'crfs_sps_rf_blrf-324g8z'
+            }
+        ];
          
-    });
-
-    // After the last frame rendered before the map enters an "idle" state.
-    map.on('idle', () => {
-        // If these two layers were not added to the map, abort
-        if (!map.getLayer('sheepshead-2005') || !map.getLayer('sheepshead-2020')) {
-            return;
-        }
-
-        // Create groups for each species.
-        const speciesGroups = [];
-        
-        speciesList.forEach(function(species) {
-            // Enumerate ids of the layers.
-            const toggleableLayerIds = [];
-
-            yearsList.forEach(function(year) {
-                toggleableLayerIds.push(`${species.name}-${year}`);
-            });
+        function filterBy(year, speciesName) {
+            document.getElementById('year').innerHTML = year;
+    
+            mpasYear = `RF_${year}`;
+            speciesYear = `${speciesName}-${year}`;
+            // Set the label to the year
+            // document.getElementById('year').textContent = years[year];
+            for (var eachYear of yearsList) {
+                map.setLayoutProperty(`${speciesName}-${eachYear}`, 'visibility', 'none');
+            };
             
-            speciesGroups.push({
-                'id': species.name,
-                'layers': toggleableLayerIds.filter(id => id.includes(species.name))
-            });
-        });
-        
-        // Set up the corresponding toggle button for each layer.
-        for (const species of speciesGroups) {
-            // Skip layers that already have a button set up.
-            if (document.getElementById(species.id)) {
-                continue;
+            map.setLayoutProperty(
+                speciesYear,
+                'visibility',
+                'visible'
+            );
+    
+            if (document.getElementById(`${speciesName}`)) {
+                document.getElementById(`${speciesName}`).classList.add('active');
             }
             
-        
-            // Create a link.
-            const link = document.createElement('a');
-            link.id = species.id;
-            link.href = '#';
-            link.dataset.years = species.layers;
-            link.textContent = species.id;
-            link.className = 'active';
-        
-            // Show or hide layer when the toggle is clicked.
-            link.onclick = function (e) { 
-                const clicked = this.dataset.years;
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Set species name for slider
-                document.getElementById('active-species').innerHTML = species.id;
-
-                const clickedArray = clicked.split(',');
-                const sliderYear = document.getElementById('slider').value;
-                
-                const visibleLayer = clickedArray.filter(speciesYear => speciesYear.includes(sliderYear));
-
-
-                let visibility = map.getLayoutProperty(
-                    visibleLayer,
-                    'visibility'
-                );
-
-                // Hide all layers now, then we add the clicked layer back visible
-                hideAllLayers();
-
-                // Toggle layer visibility by changing the layout object's visibility property.
-                if (visibility === 'visible') {
-                    map.setLayoutProperty(visibleLayer, 'visibility', 'none');
-                    this.className = '';
-                } else {
-                    this.className = 'active';
-                    map.setLayoutProperty(
-                        visibleLayer,
-                        'visibility',
-                        'visible'
-                    );
-                }
-            };
-        
-            const layers = document.getElementById('menu');
-            layers.appendChild(link);
         }
-    });
-
-    function hideAllLayers() {
-        speciesList.forEach(function(species) {
-            yearsList.forEach(function(year) {
-                map.setLayoutProperty(`${species.name}-${year}`, 'visibility', 'none');
-            });
-        });
-    }
     
-
-    document
-        .getElementById('slider')
-        .addEventListener('input', function (e) {
-            var year = parseInt(e.target.value, 10);
-            // year = 'RF_' + year;
-            var speciesName = document.getElementById('active-species').innerHTML;
-            filterBy(year, speciesName);
-    });
-
-
-</script>
-
+        map.on('load', function() {
+            
+            speciesList.forEach(function(species) {
+                
+                map.addSource(`${species.name}-source`, {
+                    type: 'vector',
+                    url: `${species.source}`
+                });
+    
+                yearsList.forEach(function(year) {
+                    map.addLayer({
+                        'id': `${species.name}-${year}`,
+                        'type': 'fill',
+                        'source': `${species.name}-source`,
+                        'source-layer': `${species.sourceLayer}`,
+                        'layout': {
+                            'visibility': 'none'
+                        },
+                        'paint': {
+                            'fill-opacity': 0.8,
+                            'fill-color': {
+                                'property': `RF_${year}`,
+                                'stops': [
+                                    [0, 'rgba(0,0,0,0)'],
+                                    [0.0000000001, 'rgba(100,240,0,1)'],
+                                    [6.3442333148500003, 'rgba(100,240,0,1)'],
+                                    [46.382601766800001, 'rgba(130,206,0,1)'],
+                                    [83.7009557234, 'rgba(175,226,0,1)'],
+                                    [138.48820086399999, 'rgba(227,245,0,1)'],
+                                    [215.70801481399999, 'rgba(255,226,0,1)'],
+                                    [321.83227328700002, 'rgba(255,170,0,1)'],
+                                    [461.69610297499997, 'rgba(255,113,0,1)'],
+                                    [659.59383335500002, 'rgba(255,56,0,1)'],
+                                    [1053.69263228, 'rgba(255,0,0,1)'],
+                                ]
+                            },
+                            'fill-outline-color': {
+                                'property': `RF_${year}`,
+                                'stops': [
+                                    [0, 'rgba(0,0,0,0)'],
+                                    [0.0000000001, 'rgba(200,200,200,1)'],
+                                    [6.3442333148500003, 'rgba(200,200,200,1)'],
+                                    [46.382601766800001, 'rgba(200,200,200,1)'],
+                                    [83.7009557234, 'rgba(200,200,200,1)'],
+                                    [138.48820086399999, 'rgba(200,200,200,1)'],
+                                    [215.70801481399999, 'rgba(200,200,200,1)'],
+                                    [321.83227328700002, 'rgba(200,200,200,1)'],
+                                    [461.69610297499997, 'rgba(200,200,200,1)'],
+                                    [659.59383335500002, 'rgba(200,200,200,1)'],
+                                    [1053.69263228, 'rgba(200,200,200,1)'],
+                                ]
+                            }
+                        }
+                    });
+                });
+            });
+    
+            // Port perspectives
+            map.addSource('MPA-source', {
+               type: 'vector',
+               url: 'mapbox://mpahu.1xc41lqh'
+            });
+    
+    
+    
+            map.addLayer({
+                'id': 'MPA-layer',
+                'type': 'fill',
+                'source': 'MPA-source',
+                'source-layer': 'MPA_deliverables-9n11ad',
+                'paint': {
+                    'fill-color': [
+                        'match',
+                        ['get', 'Type'],
+                        'SMR',
+                        `${mpaColors.SMR}`,
+                        'SMCA',
+                        `${mpaColors.SMCA}`,
+                        'SMRMA',
+                        `${mpaColors.SMRMA}`,
+                        'SMCA (No-Take)',
+                        `${mpaColors['SMCA (No-Take)']}`,
+                        'SC',
+                        `${mpaColors.SC}`,
+                        'SP',
+                        `${mpaColors.SP}`,
+                        'transparent'
+                    ],
+                    'fill-opacity': 0.8,
+                    'fill-outline-color': [
+                        'match',
+                        ['get', 'Type'],
+                        'SMR',
+                        `#d4d4d4`,
+                        'SMCA',
+                        `#d4d4d4`,
+                        'SMRMA',
+                        `#d4d4d4`,
+                        'SMCA (No-Take)',
+                        `#d4d4d4`,
+                        'SC',
+                        `#d4d4d4`,
+                        'SP',
+                        `#d4d4d4`,
+                        'transparent'
+                    ]
+                }
+           });
+    
+           map.addSource('10m-bathymetry-81bsvj', {
+                type: 'vector',
+                url: 'mapbox://mapbox.9tm8dx88'
+            });
+             
+            map.addLayer({
+                'id': '10m-bathymetry-81bsvj',
+                'type': 'fill',
+                'source': '10m-bathymetry-81bsvj',
+                'source-layer': '10m-bathymetry-81bsvj',
+                'layout': {},
+                'paint': {
+                'fill-outline-color': 'hsla(337, 82%, 62%, 0)',
+                // cubic bezier is a four point curve for smooth and precise styling
+                // adjust the points to change the rate and intensity of interpolation
+                'fill-color': [
+                'interpolate',
+                ['cubic-bezier', 0, 0.5, 1, 0.5],
+                ['get', 'DEPTH'],
+                200,
+                '#78bced',
+                9000,
+                '#15659f'
+                ]
+                }
+            },
+            'land-structure-polygon'
+            );
+    
+            // Initial Filter
+            filterBy(2005, 'Lobster');
+             
+        });
+    
+        // After the last frame rendered before the map enters an "idle" state.
+        map.on('idle', () => {
+            // If these two layers were not added to the map, abort
+            // if (!map.getLayer('sheepshead-2005') || !map.getLayer('sheepshead-2020')) {
+               // return;
+            // }
+    
+            // Create groups for each species.
+            const speciesGroups = [];
+            
+            speciesList.forEach(function(species) {
+                // Enumerate ids of the layers.
+                const toggleableLayerIds = [];
+    
+                yearsList.forEach(function(year) {
+                    toggleableLayerIds.push(`${species.name}-${year}`);
+                });
+                
+                speciesGroups.push({
+                    'id': species.name,
+                    'layers': toggleableLayerIds.filter(id => id.includes(species.name))
+                });
+            });
+            
+            // Set up the corresponding toggle button for each layer.
+            for (const species of speciesGroups) {
+                // Skip layers that already have a button set up.
+                if (document.getElementById(species.id)) {
+                    continue;
+                }
+                
+            
+                // Create a link.
+                const link = document.createElement('a');
+                link.id = species.id;
+                link.href = '#';
+                link.dataset.years = species.layers;
+                link.textContent = species.id;
+                link.className = 'species-radio';
+            
+                // Show or hide layer when the toggle is clicked.
+                link.onclick = function (e) { 
+                    const clicked = this.dataset.years;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Set species name for slider
+                    document.getElementById('active-species').innerHTML = species.id;
+    
+                    const clickedArray = clicked.split(',');
+                    const sliderYear = document.getElementById('slider').value;
+                    
+                    const visibleLayer = clickedArray.filter(speciesYear => speciesYear.includes(sliderYear));
+    
+                    let visibility = map.getLayoutProperty(
+                        visibleLayer,
+                        'visibility'
+                    );
+    
+                    // Hide all layers now, then we add the clicked layer back visible
+                    // hideAllLayers();
+                    // Turn off all actives
+                   // document.querySelectorAll('.species-radio').forEach(function(e,i) { 
+                    //    e.classList.remove('active');
+                    // });
+    
+                    // Toggle layer visibility by changing the layout object's visibility property.
+                    if (visibility === 'visible') {
+                        map.setLayoutProperty(visibleLayer, 'visibility', 'none');
+                        this.classList.remove('active');
+                    } else {
+                        this.classList.add('active');
+                        map.setLayoutProperty(
+                            visibleLayer,
+                            'visibility',
+                            'visible'
+                        );
+                    }
+                };
+            
+                const layers = document.getElementById('menu');
+                layers.appendChild(link);
+            }
+    
+        });
+    
+        function hideAllLayers() {
+            speciesList.forEach(function(species) {
+                yearsList.forEach(function(year) {
+                    map.setLayoutProperty(`${species.name}-${year}`, 'visibility', 'none');
+                });
+            });
+        }
+        
+    
+        document
+            .getElementById('slider')
+            .addEventListener('input', function (e) {
+                var year = parseInt(e.target.value, 10);
+                // year = 'RF_' + year;
+                var speciesName = document.getElementById('active-species').innerHTML;
+                filterBy(year, speciesName);
+        });
+     
+        map.on('click', 'MPA-layer', (e) => {
+            let popupContent = '';
+    
+            if (e.features[0].properties['NAME']) {
+                popupContent += e.features[0].properties['NAME'];
+            }
+            if (e.features[0].properties['Synthesis']) {
+                popupContent += `<br><br>Synthesis: ${e.features[0].properties['Synthesis']}`;
+            }
+            if (e.features[0].properties['Port_summary']) {
+                popupContent += `<br><br>Port Summary: ${e.features[0].properties['Port_summary']}`;
+            }
+           
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML(popupContent)
+                .addTo(map);
+        });
+        
+        // Change the cursor to a pointer when
+        // the mouse is over the states layer.
+        map.on('mouseenter', 'MPA-layer', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        
+        // Change the cursor back to a pointer
+        // when it leaves the states layer.
+        map.on('mouseleave', 'MPA-layer', () => {
+            map.getCanvas().style.cursor = '';
+        });
+    
+    </script>
 </body>
 </html>
