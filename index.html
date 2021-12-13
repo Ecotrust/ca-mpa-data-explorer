@@ -139,7 +139,7 @@ background: #3074a4;
         zoom: 8 // starting zoom
     });
 
-    var years = [
+    var yearsList = [
         '2005',
         '2006',
         '2007',
@@ -158,7 +158,7 @@ background: #3074a4;
         '2020'
     ];
 
-    var species = [
+    var speciesList = [
         'sheepshead',
         'urchine'
     ];
@@ -169,7 +169,7 @@ background: #3074a4;
         sheepsheadYear = `sheepshead-${year}`;
         // Set the label to the year
         // document.getElementById('year').textContent = years[year];
-        for (var eachYear of years) {
+        for (var eachYear of yearsList) {
             map.setLayoutProperty(`sheepshead-${eachYear}`, 'visibility', 'none');
         };
         
@@ -189,7 +189,7 @@ background: #3074a4;
             url: 'mapbox://mpahu.86v7vgbz'
         });
         
-        years.forEach(function(year) {
+        yearsList.forEach(function(year) {
             map.addLayer({
                 'id': `sheepshead-${year}`,
                 'type': 'fill',
@@ -199,7 +199,7 @@ background: #3074a4;
                     'visibility': 'none'
                 },
                 'paint': {
-                    'fill-opacity': 0.8,
+                    'fill-opacity': 0.6,
                     'fill-color': {
                         'property': `RF_${year}`,
                         'stops': [
@@ -234,11 +234,11 @@ background: #3074a4;
         // Create groups for each species.
         const speciesGroups = [];
         
-        species.forEach(function(species) {
+        speciesList.forEach(function(species) {
             // Enumerate ids of the layers.
             const toggleableLayerIds = [];
 
-            years.forEach(function(year) {
+            yearsList.forEach(function(year) {
                 toggleableLayerIds.push(`${species}-${year}`);
             });
             
@@ -260,28 +260,35 @@ background: #3074a4;
             const link = document.createElement('a');
             link.id = species.id;
             link.href = '#';
+            link.dataset.years = species.layers;
             link.textContent = species.id;
             link.className = 'active';
         
             // Show or hide layer when the toggle is clicked.
-            link.onclick = function (e) {
-                const clickedLayer = this.textContent;
+            link.onclick = function (e) { 
+                const clicked = this.dataset.years;
                 e.preventDefault();
                 e.stopPropagation();
-        
-                const visibility = map.getLayoutProperty(
-                    clickedLayer,
+                
+                const clickedArray = clicked.split(',');
+                const sliderYear = document.getElementById('slider').value;
+                
+                const visibleLayer = clickedArray.filter(speciesYear => speciesYear.includes(sliderYear));
+
+
+                let visibility = map.getLayoutProperty(
+                    visibleLayer,
                     'visibility'
                 );
-        
+
                 // Toggle layer visibility by changing the layout object's visibility property.
                 if (visibility === 'visible') {
-                    map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                    map.setLayoutProperty(visibleLayer, 'visibility', 'none');
                     this.className = '';
                 } else {
                     this.className = 'active';
                     map.setLayoutProperty(
-                        clickedLayer,
+                        visibleLayer,
                         'visibility',
                         'visible'
                     );
@@ -293,6 +300,13 @@ background: #3074a4;
         }
     });
 
+    function hideAllLayers() {
+        speciesList.forEach(function(species) {
+            yearsList.forEach(function(year) {
+                map.setLayoutProperty(`${species}-${year}`, 'visibility', 'none');
+            });
+        });
+    }
     
 
     document
