@@ -7,59 +7,21 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css' rel='stylesheet' />
     <style>
-        .layer-switcher {
-  min-height: 30px;
-  min-width: 30px;
-  background: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%228%22%20height%3D%228%22%20viewBox%3D%220%200%208%208%22%3E%0A%20%20%3Cpath%20d%3D%22M0%200v4h4v-4h-4zm5%202v3h-3v1h4v-4h-1zm2%202v3h-3v1h4v-4h-1z%22%20/%3E%0A%3C/svg%3E')
-    white;
-  background-repeat: no-repeat;
-  background-size: 15px 15px;
-  background-position: center;
-}
-
-#menu {
-  background: white;
-  padding-left: 8px;
-  padding-right: 8px;
-  position: relative;
-  display: none;
-  margin: 0 !important;
-  font-size: 15px;
-}
-
-.layer-switcher-list h3 {
-  margin: 0px;
-  margin-top: 6px;
-}
-
-.layer-switcher-list ul {
-  list-style: none;
-  padding: 0;
-  user-select: none;
-  margin-bottom: 4px;
-}
-
-.layer-switcher-list li {
-  display: block;
-  width: 100%;
-  height: 25px;
-}
-
-.layer-switcher-list input {
-  margin-left: 8px;
-  margin-top: 4px;
-  float: right;
-}
-
-.layer-switcher-list label {
-  float: left;
-}
-</style>
-    <style>
         #page-container { 
             position: relative; 
             height: calc(100vh - 125px); 
         }
+    .layer-switcher {
+        min-height: 36px;
+        min-width: 36px;
+        background-repeat: no-repeat;
+        background-size: 18px 18px;
+        background-position: center;
+        position: absolute;
+        right: 12px;
+        width: auto;
+        z-index: 999;
+    }
         #map {
             position: absolute;
             top: 0px;
@@ -80,16 +42,22 @@
         }
 
         #menu {
-            /* background: #fff; */
-            /* position: absolute; */
-            /* z-index: 1; */
-            /* top: 20px; */
-            /* right: 10px; */
-            /* border-radius: 3px; */
-            /* width: 200px; */
+            background: #fff;
+            position: absolute;
+            z-index: 1;
+  height: 0;
+visibility: hidden;
+            top: 20px;
+            right: 48px;
+            border-radius: 3px;
+            width: 200px;
             border: 1px solid rgba(0, 0, 0, 0.4);
             font-family: 'Open Sans', sans-serif;
         }
+#menu.show {
+height: auto;
+visibility: visible;
+}
  
         #menu a {
             font-size: 12px;
@@ -101,30 +69,27 @@
             text-decoration: none;
             border-bottom: 1px solid rgba(0, 0, 0, 0.25);
             text-align: center;
-            width: 100%;
         }
  
         #menu a:last-child {
             border: none;
         }
  
-        /* #menu a:hover {
+        #menu a:hover {
             background-color: #00aa77;
             color: #404040;
-        } */
+        }
  
         #menu a.active {
             background-color: #009955;
             color: #ffffff;
         }
  
-        /* #menu a.active:hover {
+        #menu a.active:hover {
             background: #ddd;
-        } */
-    </style>
+        }
 
-    <style>
-        .map-overlay {
+        .year-overlay {
             font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
             position: absolute;
             width: 25%;
@@ -133,7 +98,7 @@
             padding: 10px;
         }
      
-        .map-overlay .map-overlay-inner {
+        .year-overlay .map-overlay-inner {
             background-color: #fff;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
             border-radius: 3px;
@@ -141,18 +106,18 @@
             margin-bottom: 10px;
         }
      
-        .map-overlay h2 {
+        .year-overlay h2 {
             line-height: 24px;
             display: block;
             margin: 0 0 10px;
         }
      
-        .map-overlay .legend .bar {
+        .year-overlay .legend .bar {
             height: 10px;
             width: 100%;
             background: linear-gradient(90deg, rgba(100,240,0,1) 0%, rgba(130,206,0,1) 12%, rgba(175,226,0,1) 24%, rgba(227,245,0,1) 36%, rgba(255,226,0,1) 48%, rgba(255,170,0,1) 60%, rgba(255,113,0,1) 72%, rgba(255,56,0,1) 84%, rgba(255,0,0,1) 100%);
         }
-        .map-overlay input {
+        .year-overlay input {
             background-color: transparent;
             display: inline-block;
             width: 100%;
@@ -165,17 +130,16 @@
    appearance: auto;
    -webkit-appearance: auto;
 }
-    </style>
+</style>
 
 </head>
 <body>
 
-    <div class="layer-switcher">
-        <div id="menu"></div>
-    </div>
+    <a class="layer-switcher"></a>
+    <div id="menu"></div>
     <div id="map"></div>
 
-    <div class="map-overlay top">
+    <div class="map-overlay year-overlay top">
         <div class="map-overlay-inner">
             <h2 id="active-species">Lobster</h2>
             <label id="year">2005</label>
@@ -191,10 +155,14 @@
  
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script>
+        document.querySelector('.layer-switcher').addEventListener('click', function(e) { document.querySelector('#menu').classList.toggle('show');
+});
+
         mapboxgl.accessToken = 'pk.eyJ1IjoibXBhaHUiLCJhIjoiY2tyZmRhaGRqMzZkZjJxcjJnOWoyejJwaCJ9.Vd3zk7da05LpU8KM1kqtZA';
         var map = new mapboxgl.Map({
             container: 'map', // container id
-            style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
+            style: 'mapbox://styles/mapbox/light-v10',
+            // style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
             center: [-120.561, 34.271], // starting position [lng, lat]
             zoom: 8 // starting zoom
         });
@@ -416,8 +384,6 @@
                url: 'mapbox://mpahu.1xc41lqh'
             });
     
-    
-    
             map.addLayer({
                 'id': 'MPA-layer',
                 'type': 'fill',
@@ -461,37 +427,12 @@
                     ]
                 }
            });
-    
-           map.addSource('10m-bathymetry-81bsvj', {
-                type: 'vector',
-                url: 'mapbox://mapbox.9tm8dx88'
-            });
-             
-            map.addLayer({
-                'id': '10m-bathymetry-81bsvj',
-                'type': 'fill',
-                'source': '10m-bathymetry-81bsvj',
-                'source-layer': '10m-bathymetry-81bsvj',
-                'layout': {},
-                'paint': {
-                'fill-outline-color': 'hsla(337, 82%, 62%, 0)',
-                // cubic bezier is a four point curve for smooth and precise styling
-                // adjust the points to change the rate and intensity of interpolation
-                'fill-color': [
-                'interpolate',
-                ['cubic-bezier', 0, 0.5, 1, 0.5],
-                ['get', 'DEPTH'],
-                200,
-                '#78bced',
-                9000,
-                '#15659f'
-                ]
-                }
-            },
-            'land-structure-polygon'
-            );
-             
+
+        
         });
+
+        const poundsPopup = new mapboxgl.Popup();
+            
     
         // After the last frame rendered before the map enters an "idle" state.
         map.on('idle', () => {
@@ -502,13 +443,25 @@
     
             // Create groups for each species.
             const speciesGroups = [];
-            
+
             speciesList.forEach(function(species) {
                 // Enumerate ids of the layers.
                 const toggleableLayerIds = [];
     
                 yearsList.forEach(function(year) {
                     toggleableLayerIds.push(`${species.name}-${year}`);
+
+                    map.on('click', `${species.name}-${year}`, (specyear) => {
+                        var poundsInt = specyear.features[0].properties[`RF_${year}`].toFixed();
+                        if (poundsInt > 0) {
+                            var poundsString = poundsInt.toString();
+                            var popupContent = `<strong>${species.name} in ${year}:</strong> ${poundsString} lbs`;
+                            poundsPopup.setLngLat(specyear.lngLat);
+                            poundsPopup.setHTML(popupContent);
+                            poundsPopup.addTo(map);
+                        }
+                    });
+
                 });
                 
                 speciesGroups.push({
@@ -575,6 +528,7 @@
             
                 const layers = document.getElementById('menu');
                 layers.appendChild(link);
+
             }
     
         });
@@ -627,7 +581,8 @@
         map.on('mouseleave', 'MPA-layer', () => {
             map.getCanvas().style.cursor = '';
         });
-    
+        
+
     </script>
 </body>
 </html>
