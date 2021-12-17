@@ -6,22 +6,40 @@
     <meta name='viewport' content='width=device-width, initial-scale=1' />
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css' rel='stylesheet' />
+
     <style>
+        body {
+            margin: 0;
+            padding: 0;
+
+        }
         #page-container { 
             position: relative; 
-            height: calc(100vh - 125px); 
+            /* height: calc(100vh - 125px);  */
+            height: 100vh;
+            width: 100vw;
         }
-    .layer-switcher {
-        min-height: 36px;
-        min-width: 36px;
-        background-repeat: no-repeat;
-        background-size: 18px 18px;
-        background-position: center;
-        position: absolute;
-        right: 12px;
-        width: auto;
-        z-index: 999;
-    }
+
+        .layer-switcher {
+            cursor: pointer;
+            height: 36px;
+            width: 36px;
+            position: absolute;
+            right: 12px;
+            top: 20px;
+            z-index: 999;
+        }
+
+        .icon {
+            height: 36px;
+            width: 100%;
+        }
+
+        .icon {
+            stroke: #000;
+            fill: transparent;
+        }
+
         #map {
             position: absolute;
             top: 0px;
@@ -135,23 +153,29 @@ visibility: visible;
 </head>
 <body>
 
-    <a class="layer-switcher"></a>
-    <div id="menu"></div>
-    <div id="map"></div>
+    <div id="page-container">
+        <a class="layer-switcher"> <svg class="icon" viewBox="0 0 30 30">
+            <path  d="M3.4,11.9l8.8,4.4l8.4-4.4"/>
+            <path  d="M3.4,16.2l8.8,4.5l8.4-4.5"/>
+            <path  d="M3.7,7.8l8.6-4.5l8,4.5l-8,4.3L3.7,7.8z"/></svg>
+        </a>
+        <div id="menu"></div>
+        <div id="map"></div>
 
-    <div class="map-overlay year-overlay top">
-        <div class="map-overlay-inner">
-            <h2 id="active-species">Lobster</h2>
-            <label id="year">2005</label>
-            <input id="slider" type="range" min="2005" max="2020" step="1" value="2005">
-        </div>
-        <div class="map-overlay-inner">
-            <div id="legend" class="legend">
-                <div class="bar"></div>
-                <div>lbs (yr)</div>
+        <div class="map-overlay year-overlay top">
+            <div class="map-overlay-inner">
+                <h2 id="active-species">Lobster</h2>
+                <label id="year">2005</label>
+                <input id="slider" type="range" min="2005" max="2020" step="1" value="2005">
             </div>
-        </div>
-    </div>        
+            <div class="map-overlay-inner">
+                <div id="legend" class="legend">
+                    <div class="bar"></div>
+                    <div>lbs (yr)</div>
+                </div>
+            </div>
+        </div> 
+    </div>       
  
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script>
@@ -340,37 +364,37 @@ visibility: visible;
                             'visibility': 'none'
                         },
                         'paint': {
-                            'fill-opacity': 0.8,
+                            'fill-opacity': 0.2,
                             'fill-color': {
                                 'property': `RF_${year}`,
                                 'stops': [
-                                    [0, 'rgba(0,0,0,0)'],
-                                    [0.0000000001, 'rgba(100,240,0,1)'],
-                                    [6.3442333148500003, 'rgba(100,240,0,1)'],
-                                    [46.382601766800001, 'rgba(130,206,0,1)'],
-                                    [83.7009557234, 'rgba(175,226,0,1)'],
-                                    [138.48820086399999, 'rgba(227,245,0,1)'],
-                                    [215.70801481399999, 'rgba(255,226,0,1)'],
-                                    [321.83227328700002, 'rgba(255,170,0,1)'],
-                                    [461.69610297499997, 'rgba(255,113,0,1)'],
-                                    [659.59383335500002, 'rgba(255,56,0,1)'],
-                                    [1053.69263228, 'rgba(255,0,0,1)'],
+                                    [0, 'transparent'],
+                                    [0.0000000001, '#38A800'],
+                                    [7.696675, '#5ABC00'],
+                                    [27.61371, '#82CF00'],
+                                    [57.96863, '#B0E200'],
+                                    [103.096, '#E3F500'],
+                                    [169.1131, '#FFE300'],
+                                    [268.3365, '#FFAA00'],
+                                    [401.793, '#FF7100'],
+                                    [607.9608, '#FF3900'],
+                                    [845.4834, '#FF0000']
                                 ]
                             },
                             'fill-outline-color': {
                                 'property': `RF_${year}`,
                                 'stops': [
-                                    [0, 'rgba(0,0,0,0)'],
-                                    [0.0000000001, 'rgba(200,200,200,1)'],
-                                    [6.3442333148500003, 'rgba(200,200,200,1)'],
-                                    [46.382601766800001, 'rgba(200,200,200,1)'],
-                                    [83.7009557234, 'rgba(200,200,200,1)'],
-                                    [138.48820086399999, 'rgba(200,200,200,1)'],
-                                    [215.70801481399999, 'rgba(200,200,200,1)'],
-                                    [321.83227328700002, 'rgba(200,200,200,1)'],
-                                    [461.69610297499997, 'rgba(200,200,200,1)'],
-                                    [659.59383335500002, 'rgba(200,200,200,1)'],
-                                    [1053.69263228, 'rgba(200,200,200,1)'],
+                                    [0, 'transparent'],
+                                    [0.0000000001, '#DFDFDF'],
+                                    [7.696675, '#DFDFDF'],
+                                    [27.61371, '#DFDFDF'],
+                                    [57.96863, '#DFDFDF'],
+                                    [103.096, '#DFDFDF'],
+                                    [169.1131, '#DFDFDF'],
+                                    [268.3365, '#DFDFDF'],
+                                    [401.793, '#DFDFDF'],
+                                    [607.9608, '#DFDFDF'],
+                                    [845.4834, '#DFDFDF']
                                 ]
                             }
                         }
