@@ -4,8 +4,8 @@
     <meta charset='utf-8' />
     <title></title>
     <meta name='viewport' content='width=device-width, initial-scale=1' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js'></script>
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' />
 
     <style>
         body {
@@ -21,9 +21,10 @@
         }
 
         .layer-switcher {
+            border: 1px solid #000;
             cursor: pointer;
-            height: 36px;
-            width: 36px;
+            height: 34px;
+            width: 34px;
             position: absolute;
             right: 12px;
             top: 20px;
@@ -48,15 +49,13 @@
             right: 0;
             width: 100%;
         }
-        .leaflet-timeline-controls{
-            box-sizing: border-box;
-            width: 100%;
-            margin: 0;
-            margin-bottom: 15px;
-        }
 
         .mapboxgl-popup {
-            max-width: 500px;
+            max-width: 500px !important;
+        }
+
+        .mapboxgl-popup .thead {
+            background-color: rgba(194,221,224,0.5);
         }
 
         #menu {
@@ -118,7 +117,7 @@ visibility: visible;
      
         .year-overlay .map-overlay-inner {
             background-color: #fff;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 1px 2px rgba(235, 144, 144, 0.2);
             border-radius: 3px;
             padding: 6px;
             margin-bottom: 10px;
@@ -133,7 +132,19 @@ visibility: visible;
         .year-overlay .legend .bar {
             height: 10px;
             width: 100%;
-            background: linear-gradient(90deg, rgba(100,240,0,1) 0%, rgba(130,206,0,1) 12%, rgba(175,226,0,1) 24%, rgba(227,245,0,1) 36%, rgba(255,226,0,1) 48%, rgba(255,170,0,1) 60%, rgba(255,113,0,1) 72%, rgba(255,56,0,1) 84%, rgba(255,0,0,1) 100%);
+            background: linear-gradient(
+                90deg, 
+                #f7f4f9 0%,
+                #e7e1ef 12%,
+                #d4b9da 23%,
+                #c994c7 34%,
+                #df65b0 45%,
+                #e7298a 56%,
+                #ce1256 67%,
+                #980043 78%,
+                #67001f 89%,
+                #36000d 100%
+            );
         }
         .year-overlay input {
             background-color: transparent;
@@ -154,7 +165,8 @@ visibility: visible;
 <body>
 
     <div id="page-container">
-        <a class="layer-switcher"> <svg class="icon" viewBox="0 0 30 30">
+        <a class="layer-switcher"> 
+            <svg class="icon" viewBox="0 0 24 24">
             <path  d="M3.4,11.9l8.8,4.4l8.4-4.4"/>
             <path  d="M3.4,16.2l8.8,4.5l8.4-4.5"/>
             <path  d="M3.7,7.8l8.6-4.5l8,4.5l-8,4.3L3.7,7.8z"/></svg>
@@ -164,7 +176,7 @@ visibility: visible;
 
         <div class="map-overlay year-overlay top">
             <div class="map-overlay-inner">
-                <h2 id="active-species">Lobster</h2>
+                <h2 id="active-species" data-species="Lobster">Lobster</h2>
                 <label id="year">2005</label>
                 <input id="slider" type="range" min="2005" max="2020" step="1" value="2005">
             </div>
@@ -179,13 +191,15 @@ visibility: visible;
  
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script>
-        document.querySelector('.layer-switcher').addEventListener('click', function(e) { document.querySelector('#menu').classList.toggle('show');
-});
+        document.querySelector('.layer-switcher').addEventListener('click', function(e) { 
+            document.querySelector('#menu').classList.toggle('show');
+        });
 
         mapboxgl.accessToken = 'pk.eyJ1IjoibXBhaHUiLCJhIjoiY2tyZmRhaGRqMzZkZjJxcjJnOWoyejJwaCJ9.Vd3zk7da05LpU8KM1kqtZA';
         var map = new mapboxgl.Map({
             container: 'map', // container id
-            style: 'mapbox://styles/mapbox/light-v10',
+            // style: 'mapbox://styles/mapbox/light-v10',
+            style: 'mapbox://styles/mapbox/bright-v9',
             // style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
             center: [-120.561, 34.271], // starting position [lng, lat]
             zoom: 8 // starting zoom
@@ -221,116 +235,149 @@ visibility: visible;
     
         var speciesList = [
             {
+                'id': 'Lobster',
                 'name': 'Lobster',
                 'source': 'mapbox://mpahu.7vr0ubhl',
                 'sourceLayer': 'CRFS_SPS_RF_lobt-9p2poo'
             },
             {
+                'id': 'Urchin',
                 'name': 'Urchin',
                 'source': 'mapbox://mpahu.5trz69b1',
                 'sourceLayer': 'CRFS_SPS_RF_urch-7ge87u'
             },
             {
-                'name': 'Nearshore_fishfin_all',
+                'id': 'Nearshore_fishfin_all',
+                'name': 'Nearshore fishfin',
                 'source': 'mapbox://mpahu.bvs86fmg',
                 'sourceLayer': 'CRFS_SPS_RF_nsfn-a8p67p'
             },
             {
-                'name': 'Treefish_Rockfish',
+                'id': 'Treefish_Rockfish',
+                'name': 'Treefish Rockfish',
                 'source': 'mapbox://mpahu.3rh1308v',
                 'sourceLayer': 'CRFS_SPS_RF_tfrf-ckrfw1'
             },
             {
-                'name': 'Quillback_Rockfish',
+                'id': 'Quillback_Rockfish',
+                'name': 'Quillback Rockfish',
                 'source': 'mapbox://mpahu.dglc5ex7',
                 'sourceLayer': 'CRFS_SPS_RF_qbrf-1dkj98'
             },
             {
-                'name': 'Olive_Rockfish',
+                'id': 'Olive_Rockfish',
+                'name': 'Olive Rockfish',
                 'source': 'mapbox://mpahu.73kl8056',
                 'sourceLayer': 'CRFS_SPS_RF_olrf-aconf8',
             },
             {
-                'name': 'Monkeyface_Prickleback',
+                'id': 'Monkeyface_Prickleback',
+                'name': 'Monkeyface Prickleback',
                 'source': 'mapbox://mpahu.cg8hjrzo',
                 'sourceLayer': 'CRFS_SPS_RF_mfpb-7ms6yb'
             },
             {
-                'name': 'Kelp_Rockfish',
+                'id': 'Kelp_Rockfish',
+                'name': 'Kelp Rockfish',
                 'source': 'mapbox://mpahu.862s6v2l',
                 'sourceLayer': 'CRFS_SPS_RF_kprf-24jxyz'
             },
             {
-                'name': 'Kelp_Greenling',
+                'id': 'Kelp_Greenling',
+                'name': 'Kelp Greenling',
                 'source': 'mapbox://mpahu.4rgcmubk',
                 'sourceLayer': 'CRFS_SPS_RF_kpgn-7ovw2f'
             },
             {
-                'name': 'Grass_Rockfish',
+                'id': 'Grass_Rockfish',
+                'name': 'Grass Rockfish',
                 'source': 'mapbox://mpahu.8kujs736',
                 'sourceLayer': 'CRFS_SPS_RF_grrf-6biq25',
             },
             {
-                'name': 'China_Rockfish',
+                'id': 'China_Rockfish',
+                'name': 'China Rockfish',
                 'source': 'mapbox://mpahu.0eyqi9mk',
                 'sourceLayer': 'CRFS_SPS_RF_chrf-c501ww'
             },
             {
-                'name': 'Gopher_Rockfish',
+                'id': 'Gopher_Rockfish',
+                'name': 'Gopher Rockfish',
                 'source': 'mapbox://mpahu.12zcggto',
                 'sourceLayer': 'CRFS_SPS_RF_gorf-a78nvu'
             },
             {
-                'name': 'California_Sheephead',
+                'id': 'California_Sheephead',
+                'name': 'California Sheephead',
                 'source': 'mapbox://mpahu.chda41ik',
                 'sourceLayer': 'CRFS_SPS_RF_cshd-70k4sb'
             },
             {
-                'name': 'Copper_Rockfish',
+                'id': 'Copper_Rockfish',
+                'name': 'Copper Rockfish',
                 'source': 'mapbox://mpahu.48qicsp7',
                 'sourceLayer': 'CRFS_SPS_RF_cprf-2aj69f'
             },
             {
+                'id': 'Cabezon',
                 'name': 'Cabezon',
                 'source': 'mapbox://mpahu.53d3bcdm',
                 'sourceLayer': 'crfs_sps_rf_cbzn-0qiefg'
             },
             {
-                'name': 'Blue_Rockfish',
+                'id': 'Blue_Rockfish',
+                'name': 'Blue Rockfish',
                 'source': 'mapbox://mpahu.d7crtpei',
                 'sourceLayer': 'crfs_sps_rf_burf-5qzuve'
             },
             {
-                'name': 'California_Scorpionfish',
+                'id': 'California_Scorpionfish',
+                'name': 'California Scorpionfish',
                 'source': 'mapbox://mpahu.01zcjqgd',
                 'sourceLayer': 'crfs_sps_rf_casn-dt2z17'
             },
             {
-                'name': 'Black-Yellow_Rockfish',
+                'id': 'Black-Yellow_Rockfish',
+                'name': 'Black-Yellow Rockfish',
                 'source': 'mapbox://mpahu.08xsc9ag',
                 'sourceLayer': 'crfs_sps_rf_byrf-d4l9f4'
             },
             {
-                'name': 'Brown_Rockfish',
+                'id': 'Brown_Rockfish',
+                'name': 'Brown Rockfish',
                 'source': 'mapbox://mpahu.48tqsvix',
                 'sourceLayer': 'crfs_sps_rf_brrf-9w8d5m'
             },
             {
-                'name': 'Black_Rockfish',
+                'id': 'Black_Rockfish',
+                'name': 'Black Rockfish',
                 'source': 'mapbox://mpahu.5ruuwl9q',
                 'sourceLayer': 'crfs_sps_rf_blrf-324g8z'
             }
         ];
+
+        function mapIsLoaded() {
+            const isLoaded = map.loaded();
+            if (isLoaded) {
+                filterSync();
+            }
+        }
+
+        function filterSync() {
+            var year = document.getElementById('slider').value;
+            var speciesId = document.getElementById('active-species').dataset.species;
+            return filterBy(year, speciesId);
+        }
          
-        function filterBy(year, speciesName) {
+        function filterBy(year, speciesId) {
             document.getElementById('year').innerHTML = year;
     
             mpasYear = `RF_${year}`;
-            speciesYear = `${speciesName}-${year}`;
+            speciesYear = `${speciesId}-${year}`;
             // Set the label to the year
             // document.getElementById('year').textContent = years[year];
             for (var eachYear of yearsList) {
-                map.setLayoutProperty(`${speciesName}-${eachYear}`, 'visibility', 'none');
+                map.setLayoutProperty(`${speciesId}-${eachYear}`, 'visibility', 'none');
             };
             
             map.setLayoutProperty(
@@ -339,8 +386,8 @@ visibility: visible;
                 'visible'
             );
     
-            if (document.getElementById(`${speciesName}`)) {
-                document.getElementById(`${speciesName}`).classList.add('active');
+            if (document.getElementById(`${speciesId}`)) {
+                document.getElementById(`${speciesId}`).classList.add('active');
             }
             
         }
@@ -349,36 +396,36 @@ visibility: visible;
             
             speciesList.forEach(function(species) {
                 
-                map.addSource(`${species.name}-source`, {
+                map.addSource(`${species.id}-source`, {
                     type: 'vector',
                     url: `${species.source}`
                 });
     
                 yearsList.forEach(function(year) {
                     map.addLayer({
-                        'id': `${species.name}-${year}`,
+                        'id': `${species.id}-${year}`,
                         'type': 'fill',
-                        'source': `${species.name}-source`,
+                        'source': `${species.id}-source`,
                         'source-layer': `${species.sourceLayer}`,
                         'layout': {
                             'visibility': 'none'
                         },
                         'paint': {
-                            'fill-opacity': 0.2,
+                            'fill-opacity': 0.8,
                             'fill-color': {
                                 'property': `RF_${year}`,
                                 'stops': [
                                     [0, 'transparent'],
-                                    [0.0000000001, '#38A800'],
-                                    [7.696675, '#5ABC00'],
-                                    [27.61371, '#82CF00'],
-                                    [57.96863, '#B0E200'],
-                                    [103.096, '#E3F500'],
-                                    [169.1131, '#FFE300'],
-                                    [268.3365, '#FFAA00'],
-                                    [401.793, '#FF7100'],
-                                    [607.9608, '#FF3900'],
-                                    [845.4834, '#FF0000']
+                                    [0.0000000001, '#f7f4f9'],
+                                    [7.696675, '#e7e1ef'],
+                                    [27.61371, '#d4b9da'],
+                                    [57.96863, '#c994c7'],
+                                    [103.096, '#df65b0'],
+                                    [169.1131, '#e7298a'],
+                                    [268.3365, '#ce1256'],
+                                    [401.793, '#980043'],
+                                    [607.9608, '#67001f'],
+                                    [845.4834, '#37000d']
                                 ]
                             },
                             'fill-outline-color': {
@@ -413,6 +460,9 @@ visibility: visible;
                 'type': 'fill',
                 'source': 'MPA-source',
                 'source-layer': 'MPA_deliverables-9n11ad',
+                'layout': {
+                    'visibility': 'visible'
+                },
                 'paint': {
                     'fill-color': [
                         'match',
@@ -431,7 +481,7 @@ visibility: visible;
                         `${mpaColors.SP}`,
                         'transparent'
                     ],
-                    'fill-opacity': 0.8,
+                    'fill-opacity': 0.6,
                     'fill-outline-color': [
                         'match',
                         ['get', 'Type'],
@@ -452,34 +502,57 @@ visibility: visible;
                 }
            });
 
+           // Create a link.
+           const mpaLayerLink = document.createElement('a');
+            mpaLayerLink.href = '#';
+            mpaLayerLink.textContent = 'MPAs';
+            mpaLayerLink.className = 'active';
+            
+            mpaLayerLink.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const visibility = map.getLayoutProperty(
+                    'MPA-layer',
+                    'visibility'
+                );
+                if (visibility === 'visible') {
+                    map.setLayoutProperty('MPA-layer', 'visibility', 'none');
+                    this.className = '';
+                } else {
+                    map.setLayoutProperty('MPA-layer', 'visibility', 'visible');
+                    this.className = 'active';
+                }
+            };
+
+            const layers = document.getElementById('menu');
+            layers.appendChild(mpaLayerLink);
         
         });
 
+        // Popup object for pounds per year per species
         const poundsPopup = new mapboxgl.Popup();
-            
-    
+        
         // After the last frame rendered before the map enters an "idle" state.
         map.on('idle', () => {
-            // If these two layers were not added to the map, abort
-            // if (!map.getLayer('sheepshead-2005') || !map.getLayer('sheepshead-2020')) {
-               // return;
-            // }
-    
+
             // Create groups for each species.
             const speciesGroups = [];
 
+            // loop through species and then through years to create a layer per species per year
+            // i.e. Lobster-2005, Lobster-2006, etc.
             speciesList.forEach(function(species) {
                 // Enumerate ids of the layers.
                 const toggleableLayerIds = [];
     
                 yearsList.forEach(function(year) {
-                    toggleableLayerIds.push(`${species.name}-${year}`);
+                    toggleableLayerIds.push(`${species.id}-${year}`);
 
-                    map.on('click', `${species.name}-${year}`, (specyear) => {
+                    map.on('click', `${species.id}-${year}`, (specyear) => {
                         var poundsInt = specyear.features[0].properties[`RF_${year}`].toFixed();
+
                         if (poundsInt > 0) {
                             var poundsString = poundsInt.toString();
-                            var popupContent = `<strong>${species.name} in ${year}:</strong> ${poundsString} lbs`;
+                            var popupContent = `<table role="table"><thead role="rowgroup"><tr role="row"><th role="columnheader">species name</th><th role="columnheader">year</th><th role="columnheader">lbs caught estimate</th></tr></thead><tbody><tr><td>${species.name}</td><td>${year}</td><td>${poundsString}</td></tr></tbody></table>`;
                             poundsPopup.setLngLat(specyear.lngLat);
                             poundsPopup.setHTML(popupContent);
                             poundsPopup.addTo(map);
@@ -489,8 +562,9 @@ visibility: visible;
                 });
                 
                 speciesGroups.push({
-                    'id': species.name,
-                    'layers': toggleableLayerIds.filter(id => id.includes(species.name))
+                    'id': species.id,
+                    'name': species.name,
+                    'layers': toggleableLayerIds.filter(id => id.includes(species.id))
                 });
             });
             
@@ -507,7 +581,7 @@ visibility: visible;
                 link.id = species.id;
                 link.href = '#';
                 link.dataset.years = species.layers;
-                link.textContent = species.id;
+                link.textContent = species.name;
                 link.className = 'species-radio';
             
                 // Show or hide layer when the toggle is clicked.
@@ -515,9 +589,6 @@ visibility: visible;
                     const clicked = this.dataset.years;
                     e.preventDefault();
                     e.stopPropagation();
-                    
-                    // Set species name for slider
-                    document.getElementById('active-species').innerHTML = species.id;
     
                     const clickedArray = clicked.split(',');
                     const sliderYear = document.getElementById('slider').value;
@@ -530,11 +601,7 @@ visibility: visible;
                     );
     
                     // Hide all layers now, then we add the clicked layer back visible
-                    // hideAllLayers();
-                    // Turn off all actives
-                   // document.querySelectorAll('.species-radio').forEach(function(e,i) { 
-                    //    e.classList.remove('active');
-                    // });
+                    hideAllLayers();
     
                     // Toggle layer visibility by changing the layout object's visibility property.
                     if (visibility === 'visible') {
@@ -547,6 +614,9 @@ visibility: visible;
                             'visibility',
                             'visible'
                         );
+                        // Set species name for slider
+                        document.getElementById('active-species').innerHTML = species.name;
+                        document.getElementById('active-species').dataset.species = species.id;
                     }
                 };
             
@@ -554,14 +624,20 @@ visibility: visible;
                 layers.appendChild(link);
 
             }
+                
     
         });
     
         function hideAllLayers() {
+            // Hide all layers
             speciesList.forEach(function(species) {
                 yearsList.forEach(function(year) {
-                    map.setLayoutProperty(`${species.name}-${year}`, 'visibility', 'none');
+                    map.setLayoutProperty(`${species.id}-${year}`, 'visibility', 'none');
                 });
+            });
+            // Turn off all active layers in switcher
+            document.querySelectorAll('.species-radio').forEach(function(e,i) { 
+                e.classList.remove('active');
             });
         }
         
@@ -571,21 +647,21 @@ visibility: visible;
             .addEventListener('input', function (e) {
                 var year = parseInt(e.target.value, 10);
                 // year = 'RF_' + year;
-                var speciesName = document.getElementById('active-species').innerHTML;
-                filterBy(year, speciesName);
+                var speciesId = document.getElementById('active-species').dataset.species;
+                filterBy(year, speciesId);
         });
      
         map.on('click', 'MPA-layer', (e) => {
-            let popupContent = '';
+            let popupContent = '<table role="table"><thead role="rowgroup"><tr role="row"><th role="columnheader">MPA Name</th><th role="columnheader">Synthesis</th><th role="columnheader">Port Summary</th></tr></thead><tbody>';
     
             if (e.features[0].properties['NAME']) {
-                popupContent += e.features[0].properties['NAME'];
+                popupContent += `<tr><td>${e.features[0].properties['NAME']}</td>`;
             }
             if (e.features[0].properties['Synthesis']) {
-                popupContent += `<br><br>Synthesis: ${e.features[0].properties['Synthesis']}`;
+                popupContent += `<td>Synthesis: ${e.features[0].properties['Synthesis']}</td>`;
             }
             if (e.features[0].properties['Port_summary']) {
-                popupContent += `<br><br>Port Summary: ${e.features[0].properties['Port_summary']}`;
+                popupContent += `<td>Port Summary: ${e.features[0].properties['Port_summary']}</td></tr></tbody></table>`;
             }
            
             new mapboxgl.Popup()
@@ -604,6 +680,13 @@ visibility: visible;
         // when it leaves the states layer.
         map.on('mouseleave', 'MPA-layer', () => {
             map.getCanvas().style.cursor = '';
+        });
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            console.log('DOM fully loaded and parsed');
+            window.setTimeout(() => {
+                mapIsLoaded();
+            }, 4000);
         });
         
 
